@@ -46,12 +46,20 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         return _gateway.submitMessage{value: msg.value}(targetToken, networkId, GAS_LIMIT, message);
     }
 
-    function onGmpReceived(bytes32 id, uint128 network, bytes32 source, uint64 nonce, bytes calldata payload)
+    function onGmpReceived(bytes32 id, uint128 networkId, bytes32 source, uint64, bytes calldata data)
         external
         payable
         returns (bytes32)
     {
-        return 0x00;
+        require(msg.sender == address(_gateway), "Unauthorized: only the gateway can call this method");
+        // TODO why analog-gmp has uint128 for networkId?
+        require(networks[uint16(networkId)] == address(uint160(uint256(source))), "Transfer from unknown network");
+
+        TransferCmd memory cmd = abi.decode(data, (TransferCmd));
+
+        _mint(cmd.to, cmd.amount);
+
+        return id;
     }
 
     function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped) {
