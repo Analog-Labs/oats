@@ -36,8 +36,14 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         return _gateway.estimateMessageCost(networkId, 96, GAS_LIMIT);
     }
 
-    function send(uint16 networkid, bytes32 recipient, uint256 amount) external payable returns (bytes32) {
-        return 0x00;
+    function send(uint16 networkId, address recipient, uint256 amount) external payable returns (bytes32 msgId) {
+        _burn(msg.sender, amount);
+
+        address targetToken = networks[networkId];
+        require(targetToken != address(0), "Unknown token on target network");
+
+        bytes memory message = abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount}));
+        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, GAS_LIMIT, message);
     }
 
     function onGmpReceived(bytes32 id, uint128 network, bytes32 source, uint64 nonce, bytes calldata payload)
