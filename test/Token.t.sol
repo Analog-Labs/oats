@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import {Token} from "../src/Token.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
+import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {Test, console} from "forge-std/Test.sol";
 
 contract TokenTest is Test {
@@ -31,6 +32,10 @@ contract TokenTest is Test {
         token = new Token("Omni Token", "OT", OWNER, CAP, GATEWAY);
         // Mock message cost
         vm.mockCall(GATEWAY, abi.encodeWithSelector(IGateway.estimateMessageCost.selector), abi.encode(COST));
+        // Mock submit message
+        vm.mockCall(
+            GATEWAY, abi.encodeWithSelector(IGateway.submitMessage.selector), abi.encode(bytes32(uint256(0xff)))
+        );
     }
 
     function test_Cost() public view {
@@ -65,5 +70,29 @@ contract TokenTest is Test {
         vm.prank(GATEWAY);
         vm.expectPartialRevert(ERC20Capped.ERC20ExceededCap.selector);
         token.onGmpReceived(bytes32(uint256(0xff)), NETWORK_B, token_b, 0, data);
+    }
+
+    function test_Send() public {
+        assertEq(token.balanceOf(OWNER), CAP / 2);
+        assertEq(token.balanceOf(USER_A), 0);
+
+        vm.prank(USER_A);
+        vm.expectRevert(bytes("Unknown token on target network"));
+        token.send(NETWORK_B, USER_B, 100500);
+
+        vm.prank(OWNER);
+        token.set_network(NETWORK_B, TOKEN_B);
+
+        vm.prank(USER_A);
+        vm.expectPartialRevert(IERC20Errors.ERC20InsufficientBalance.selector);
+        token.send(NETWORK_B, USER_B, 100500);
+
+        vm.prank(OWNER);
+        token.transfer(USER_A, 100500);
+
+        vm.prank(USER_A);
+        token.send(NETWORK_B, USER_B, 100500);
+        assertEq(token.balanceOf(USER_A), 0);
+        assertEq(token.totalSupply(), CAP / 2 - 100500);
     }
 }

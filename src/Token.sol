@@ -38,10 +38,10 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
     }
 
     function send(uint16 networkId, address recipient, uint256 amount) external payable returns (bytes32 msgId) {
-        _burn(msg.sender, amount);
-
         address targetToken = networks[networkId];
         require(targetToken != address(0), "Unknown token on target network");
+
+        _burn(msg.sender, amount);
 
         bytes memory message = abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount}));
         return _gateway.submitMessage{value: msg.value}(targetToken, networkId, GAS_LIMIT, message);
