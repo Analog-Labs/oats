@@ -6,9 +6,23 @@ import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 // TODO see BasicERC20 example
 contract Token is IOmnichain {
     IGateway private immutable _gateway;
+    mapping(uint16 => address) public networks;
+
+    uint256 private constant GAS_LIMIT = 100_000;
+
+    struct TransferCmd {
+        bytes32 from;
+        address to;
+        uint256 amount;
+    }
 
     constructor(IGateway gateway) {
         _gateway = gateway;
+    }
+
+    // TODO auth
+    function set_network(uint16 networkId, address token) public {
+        networks[networkId] = token;
     }
 
     function cost(uint16 networkId) external view returns (uint256) {
