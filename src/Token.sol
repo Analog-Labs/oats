@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 import {IOmnichain} from "./IOmnichain.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 
-// TODO see BasicERC20 example
-contract Token is IOmnichain {
+import {Ownable} from "@openzeppelin/access/Ownable.sol";
+
+contract Token is IOmnichain, Ownable {
     IGateway private immutable _gateway;
     mapping(uint16 => address) public networks;
 
@@ -16,12 +17,11 @@ contract Token is IOmnichain {
         uint256 amount;
     }
 
-    constructor(IGateway gateway) {
+    constructor(address owner, IGateway gateway) Ownable(owner) {
         _gateway = gateway;
     }
 
-    // TODO auth
-    function set_network(uint16 networkId, address token) public {
+    function set_network(uint16 networkId, address token) public onlyOwner {
         networks[networkId] = token;
     }
 
