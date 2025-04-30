@@ -4,8 +4,11 @@ import {IOmnichain} from "./IOmnichain.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
+import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
+import {ERC20Burnable} from "@openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 
-contract Token is IOmnichain, Ownable {
+contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
     IGateway private immutable _gateway;
     mapping(uint16 => address) public networks;
 
@@ -17,7 +20,11 @@ contract Token is IOmnichain, Ownable {
         uint256 amount;
     }
 
-    constructor(address owner, IGateway gateway) Ownable(owner) {
+    constructor(string memory name, string memory symbol, address owner, uint256 cap, IGateway gateway)
+        ERC20(name, symbol)
+        Ownable(owner)
+        ERC20Capped(cap)
+    {
         _gateway = gateway;
     }
 
@@ -39,5 +46,9 @@ contract Token is IOmnichain, Ownable {
         returns (bytes32)
     {
         return 0x00;
+    }
+
+    function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped) {
+        super._update(from, to, value);
     }
 }
