@@ -20,12 +20,12 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         uint256 amount;
     }
 
-    constructor(string memory name, string memory symbol, address owner, uint256 cap, IGateway gateway)
+    constructor(string memory name, string memory symbol, address owner, uint256 cap, address gateway)
         ERC20(name, symbol)
         Ownable(owner)
         ERC20Capped(cap)
     {
-        _gateway = gateway;
+        _gateway = IGateway(gateway);
     }
 
     function set_network(uint16 networkId, address token) public onlyOwner {
@@ -52,7 +52,6 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         returns (bytes32)
     {
         require(msg.sender == address(_gateway), "Unauthorized: only the gateway can call this method");
-        // TODO why analog-gmp has uint128 for networkId?
         require(networks[uint16(networkId)] == address(uint160(uint256(source))), "Transfer from unknown network");
 
         TransferCmd memory cmd = abi.decode(data, (TransferCmd));
