@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import {Token} from "../src/Token.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
+import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {Test, console} from "forge-std/Test.sol";
 
 contract TokenTest is Test {
@@ -59,5 +60,10 @@ contract TokenTest is Test {
 
         assertEq(token.balanceOf(USER_A), 100500);
         assertEq(token.totalSupply(), CAP / 2 + 100500);
+
+        data = abi.encode(TransferCmd({from: USER_B, to: USER_A, amount: CAP / 2}));
+        vm.prank(GATEWAY);
+        vm.expectPartialRevert(ERC20Capped.ERC20ExceededCap.selector);
+        token.onGmpReceived(bytes32(uint256(0xff)), NETWORK_B, token_b, 0, data);
     }
 }
