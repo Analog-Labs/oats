@@ -12,7 +12,7 @@ contract Token is IOmnichain, Ownable {
     uint256 private constant GAS_LIMIT = 100_000;
 
     struct TransferCmd {
-        bytes32 from;
+        address from;
         address to;
         uint256 amount;
     }
@@ -26,7 +26,7 @@ contract Token is IOmnichain, Ownable {
     }
 
     function cost(uint16 networkId) external view returns (uint256) {
-        return _gateway.estimateMessageCost(networkId, 96, 100000);
+        return _gateway.estimateMessageCost(networkId, 96, GAS_LIMIT);
     }
 
     function send(uint16 networkid, bytes32 recipient, uint256 amount) external payable returns (bytes32) {
