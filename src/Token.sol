@@ -26,6 +26,7 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         ERC20Capped(cap)
     {
         _gateway = IGateway(gateway);
+        _mint(owner, cap / 2);
     }
 
     function set_network(uint16 networkId, address token) public onlyOwner {

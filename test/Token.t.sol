@@ -8,20 +8,56 @@ contract TokenTest is Test {
     Token public token;
     // Anvil 1st dev account
     address constant OWNER = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
-    address constant GATEWAY = address(0x01);
+    address constant GATEWAY = address(0x42);
     uint256 constant CAP = 1_000_000;
     uint16 constant NETWORK_A = 1;
     uint16 constant NETWORK_B = 2;
+    address constant TOKEN_A = address(0x01);
+    address constant TOKEN_B = address(0x02);
+    address constant USER_A = address(0x03);
+    address constant USER_B = address(0x04);
+
     // Mocked responses
     uint256 constant COST = 42;
 
+    struct TransferCmd {
+        address from;
+        address to;
+        uint256 amount;
+    }
+
     function setUp() public {
-        token = new Token("Omni Token", "OT", OWNER, CAP, address(0x01));
+        token = new Token("Omni Token", "OT", OWNER, CAP, GATEWAY);
         // Mock message cost
         vm.mockCall(GATEWAY, abi.encodeWithSelector(IGateway.estimateMessageCost.selector), abi.encode(COST));
     }
 
     function test_Cost() public view {
         assertEq(token.cost(NETWORK_A), COST);
+    }
+
+    function test_Recieve() public {
+        assertEq(token.balanceOf(OWNER), CAP / 2);
+        assertEq(token.totalSupply(), CAP / 2);
+        assertEq(token.balanceOf(USER_A), 0);
+
+        bytes memory data = abi.encode(TransferCmd({from: USER_B, to: USER_A, amount: 100500}));
+        bytes32 token_b = bytes32(uint256(uint160(TOKEN_B)));
+
+        vm.expectRevert(bytes("Unauthorized: only the gateway can call this method"));
+        token.onGmpReceived(bytes32(uint256(0xff)), NETWORK_B, token_b, 0, data);
+
+        vm.prank(GATEWAY);
+        vm.expectRevert(bytes("Transfer from unknown network"));
+        token.onGmpReceived(bytes32(uint256(0xff)), NETWORK_B, token_b, 0, data);
+
+        vm.prank(OWNER);
+        token.set_network(NETWORK_B, TOKEN_B);
+
+        vm.prank(GATEWAY);
+        token.onGmpReceived(bytes32(uint256(0xff)), NETWORK_B, token_b, 0, data);
+
+        assertEq(token.balanceOf(USER_A), 100500);
+        assertEq(token.totalSupply(), CAP / 2 + 100500);
     }
 }
