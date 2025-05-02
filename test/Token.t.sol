@@ -22,12 +22,6 @@ contract TokenTest is Test {
     // Mocked response
     uint256 constant COST = 42;
 
-    struct TransferCmd {
-        address from;
-        address to;
-        uint256 amount;
-    }
-
     function setUp() public {
         token = new Token("Omni Token", "OT", OWNER, CAP, GATEWAY);
         // Mock message cost
@@ -45,7 +39,7 @@ contract TokenTest is Test {
         assertEq(token.totalSupply(), CAP / 2);
         assertEq(token.balanceOf(USER), 0);
 
-        bytes memory data = abi.encode(TransferCmd({from: OWNER, to: USER, amount: AMOUNT}));
+        bytes memory data = abi.encode(Token.TransferCmd({from: OWNER, to: USER, amount: AMOUNT}));
         bytes32 token_b = bytes32(uint256(uint160(TOKEN)));
 
         vm.expectRevert(bytes("Unauthorized: only the gateway can call this method"));
@@ -64,7 +58,7 @@ contract TokenTest is Test {
         assertEq(token.balanceOf(USER), AMOUNT);
         assertEq(token.totalSupply(), CAP / 2 + AMOUNT);
 
-        data = abi.encode(TransferCmd({from: OWNER, to: USER, amount: CAP / 2}));
+        data = abi.encode(Token.TransferCmd({from: OWNER, to: USER, amount: CAP / 2}));
         vm.prank(GATEWAY);
         vm.expectPartialRevert(ERC20Capped.ERC20ExceededCap.selector);
         token.onGmpReceived(MSG_ID, NETWORK, token_b, 0, data);

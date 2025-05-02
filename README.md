@@ -14,3 +14,4 @@ To generate Solidity docs as an mdbook, run:
 ``` shell
 forge doc -b
 ```
+
