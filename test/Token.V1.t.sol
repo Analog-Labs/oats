@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {Token} from "../src/Token.sol";
+import {Token} from "../src/Token.V1.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";

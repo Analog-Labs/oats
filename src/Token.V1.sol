@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {IOmnichain, ISender} from "./IOmnichain.sol";
+import {ISender} from "./IOATS.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
 
@@ -11,7 +11,7 @@ import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol"
 
 /// @notice Example of an OATS-compliant token with fixed cap,
 /// working on burn/mint model.
-contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
+contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     /// @notice GMP gateway
     IGateway private immutable _gateway;
     /// @notice Supported networks with token contract addresses

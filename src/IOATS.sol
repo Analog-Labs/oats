@@ -16,5 +16,15 @@ interface ISender {
     function send(uint16 networkId, address recipient, uint256 amount) external payable returns (bytes32 msgId);
 }
 
-/// @notice Implementor of this interface becomes OATS compliant.
-interface IOmnichain is ISender, IGmpReceiver {}
+/// @notice Interface for making GMP-based token transfer + contract call across chains.
+interface ISenderCaller {
+    function cost(uint16 networkId, bytes memory data) external view returns (uint256);
+
+    function sendAndCall(
+       uint16 networkId,
+       address recipient,
+       uint256 amount,
+       address callee,
+       bytes memory data
+    ) external payable returns (bytes32 msgId);
+}
