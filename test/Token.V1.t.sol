@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import {Token} from "../src/Token.V1.sol";
+import {Utils} from "../src/IOATS.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";
@@ -42,11 +43,11 @@ contract TokenTest is Test {
         bytes memory data = abi.encode(Token.TransferCmd({from: OWNER, to: USER, amount: AMOUNT}));
         bytes32 token_b = bytes32(uint256(uint160(TOKEN)));
 
-        vm.expectRevert(bytes("Unauthorized: only the gateway can call this method"));
+        vm.expectPartialRevert(Utils.UnauthorizedGW.selector);
         token.onGmpReceived(MSG_ID, NETWORK, token_b, 0, data);
 
         vm.prank(GATEWAY);
-        vm.expectRevert(bytes("Transfer from unknown network"));
+        vm.expectPartialRevert(Utils.UnknownNetwork.selector);
         token.onGmpReceived(MSG_ID, NETWORK, token_b, 0, data);
 
         vm.prank(OWNER);
@@ -69,7 +70,7 @@ contract TokenTest is Test {
         assertEq(token.balanceOf(USER), 0);
 
         vm.prank(USER);
-        vm.expectRevert(bytes("Unknown token on target network"));
+        vm.expectPartialRevert(Utils.UnknownToken.selector);
         token.send(NETWORK, OWNER, AMOUNT);
 
         vm.prank(OWNER);

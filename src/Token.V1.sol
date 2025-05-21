@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {ISender} from "./IOATS.sol";
+import {ISender, Utils} from "./IOATS.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
 
@@ -47,7 +47,7 @@ contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     /// @inheritdoc ISender
     function send(uint16 networkId, address recipient, uint256 amount) external payable returns (bytes32 msgId) {
         address targetToken = networks[networkId];
-        require(targetToken != address(0), "Unknown token on target network");
+        require(targetToken != address(0), Utils.UnknownToken(targetToken));
 
         _burn(msg.sender, amount);
 
@@ -61,8 +61,10 @@ contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
         payable
         returns (bytes32)
     {
-        require(msg.sender == address(_gateway), "Unauthorized: only the gateway can call this method");
-        require(networks[uint16(networkId)] == address(uint160(uint256(source))), "Transfer from unknown network");
+        require(msg.sender == address(_gateway), Utils.UnauthorizedGW(msg.sender));
+        require(
+            networks[uint16(networkId)] == address(uint160(uint256(source))), Utils.UnknownNetwork(uint16(networkId))
+        );
 
         TransferCmd memory cmd = abi.decode(data, (TransferCmd));
 

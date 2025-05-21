@@ -48,7 +48,7 @@ library Utils {
      * @dev Unknown token on target network
      * @param token Address of the token
      */
-    error UnkwnownToken(address token);
+    error UnknownToken(address token);
     /**
      * @dev Callback callee address is wrong.
      * @param callee Address of the contract to be called.
