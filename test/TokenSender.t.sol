@@ -1,13 +1,13 @@
 pragma solidity ^0.8.0;
 
-import {Token} from "../src/Token.V1.sol";
+import {Token} from "../src/TokenSender.sol";
 import {Utils} from "../src/IOATS.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {Test} from "forge-std/Test.sol";
 
-contract TokenTest is Test {
+contract TokenSenderTest is Test {
     Token public token;
 
     address constant OWNER = address(0x01);
