@@ -18,7 +18,10 @@ interface ISender {
 
 /// @notice Interface for making GMP-based token transfer + contract call across chains.
 interface ISenderCaller {
-    function cost(uint16 networkId, bytes memory data) external view returns (uint256);
+    function cost(uint16 networkId, bytes memory caldata)
+        external
+        view
+        returns (uint256);
 
     function sendAndCall(uint16 networkId, address recipient, uint256 amount, address callee, bytes memory caldata)
         external
@@ -54,4 +57,13 @@ library Utils {
      * @param callee Address of the contract to be called.
      */
     error InvalidCallee(address callee);
+
+
+    struct TransferCmd {
+        address from;
+        address to;
+        uint256 amount;
+        address callee;
+        bytes caldata;
+    }
 }
