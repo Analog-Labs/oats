@@ -20,11 +20,38 @@ interface ISender {
 interface ISenderCaller {
     function cost(uint16 networkId, bytes memory data) external view returns (uint256);
 
-    function sendAndCall(
-       uint16 networkId,
-       address recipient,
-       uint256 amount,
-       address callee,
-       bytes memory data
-    ) external payable returns (bytes32 msgId);
+    function sendAndCall(uint16 networkId, address recipient, uint256 amount, address callee, bytes memory caldata)
+        external
+        payable
+        returns (bytes32 msgId);
+}
+
+/// @notice Callee to be called upon x-chain token transfer delivery
+interface ICallee {
+    function onTransferReceived(address from, address to, uint256 amount, bytes calldata caldata)
+        external
+        returns (bytes4);
+}
+
+library Utils {
+    /**
+     * @dev onGmpRecieved() caller is not the gateway
+     * @param caller Address of the callback caller
+     */
+    error UnauthorizedGW(address caller);
+    /**
+     * @dev Unknown source network
+     * @param networkId of the source network
+     */
+    error UnknownNetwork(uint16 networkId);
+    /**
+     * @dev Unknown token on target network
+     * @param token Address of the token
+     */
+    error UnkwnownToken(address token);
+    /**
+     * @dev Callback callee address is wrong.
+     * @param callee Address of the contract to be called.
+     */
+    error InvalidCallee(address callee);
 }

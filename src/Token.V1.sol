@@ -9,7 +9,7 @@ import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 
-/// @notice Example of an OATS-compliant token with fixed cap,
+/// @notice Example of an OATS-compliant Sender token with fixed cap,
 /// working on burn/mint model.
 contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     /// @notice GMP gateway
