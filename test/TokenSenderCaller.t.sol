@@ -6,7 +6,6 @@ import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {Test} from "forge-std/Test.sol";
-import {console} from "forge-std/console.sol";
 
 contract TokenSenderCallerTest is Test {
     Token public token;
@@ -22,16 +21,10 @@ contract TokenSenderCallerTest is Test {
 
     uint16 constant NETWORK = 2;
     bytes32 constant MSG_ID = bytes32(uint256(0xff));
-    // Mocked response
-    uint256 constant COST = 42;
 
     function setUp() public {
         token = new Token("Omni Token", "OT", OWNER, CAP, GATEWAY);
         callee = new Callee();
-        // Mock message cost
-        vm.mockCall(GATEWAY, abi.encodeWithSelector(IGateway.estimateMessageCost.selector), abi.encode(COST));
-        // Mock submit message
-        vm.mockCall(GATEWAY, abi.encodeWithSelector(IGateway.submitMessage.selector), abi.encode(MSG_ID));
     }
 
     function test_Recieve() public {
