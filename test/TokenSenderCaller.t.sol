@@ -13,7 +13,8 @@ contract TokenSenderCallerTest is Test {
 
     address constant OWNER = address(0x01);
     address constant USER = address(0x02);
-    address constant TOKEN = address(0x03);
+    // Address of this token on the other network
+    address constant TOKEN_OTHER = address(0x03);
     address constant GATEWAY = address(0x42);
 
     uint256 constant CAP = 1_000_000;
@@ -24,7 +25,7 @@ contract TokenSenderCallerTest is Test {
 
     function setUp() public {
         token = new Token("Omni Token", "OT", OWNER, CAP, GATEWAY);
-        callee = new Callee();
+        callee = new Callee(address(token));
     }
 
     function test_Recieve() public {
@@ -36,7 +37,7 @@ contract TokenSenderCallerTest is Test {
             Token.TransferCmd({from: OWNER, to: USER, amount: AMOUNT, callee: address(0), caldata: new bytes(0)});
 
         bytes memory data = abi.encode(cmd);
-        bytes32 token_b = bytes32(uint256(uint160(TOKEN)));
+        bytes32 token_b = bytes32(uint256(uint160(TOKEN_OTHER)));
 
         // NOT GATEWAY CB
         vm.expectPartialRevert(Utils.UnauthorizedGW.selector);
@@ -48,7 +49,7 @@ contract TokenSenderCallerTest is Test {
         token.onGmpReceived(MSG_ID, NETWORK, token_b, 0, data);
 
         vm.prank(OWNER);
-        token.set_network(NETWORK, TOKEN);
+        token.set_network(NETWORK, TOKEN_OTHER);
 
         // NO CALL
         vm.startPrank(GATEWAY);
@@ -102,8 +103,14 @@ contract TokenSenderCallerTest is Test {
 
 contract Callee is ICallee {
     uint256 public total;
+    address immutable _token;
+
+    constructor(address token) {
+        _token = token;
+    }
 
     function onTransferReceived(address from, address, uint256 amount, bytes calldata) external {
+        require(msg.sender == _token, "Unauthorized");
         require(from != address(0), "Failed");
 
         total += amount;
