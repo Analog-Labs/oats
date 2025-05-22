@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {IOmnichain, ISender} from "./IOmnichain.sol";
+import {ISenderCaller, ICallee, Utils} from "./IOATS.sol";
 import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
 import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
 
@@ -9,9 +9,9 @@ import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 
-/// @notice Example of an OATS-compliant token with fixed cap,
+/// @notice Example of an OATS-compliant SenderCaller token with fixed cap,
 /// working on burn/mint model.
-contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
+contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     /// @notice GMP gateway
     IGateway private immutable _gateway;
     /// @notice Supported networks with token contract addresses
@@ -23,6 +23,8 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         address from;
         address to;
         uint256 amount;
+        address callee;
+        bytes caldata;
     }
 
     constructor(string memory name, string memory symbol, address owner, uint256 cap, address gateway)
@@ -39,19 +41,29 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         networks[networkId] = token;
     }
 
-    /// @inheritdoc ISender
-    function cost(uint16 networkId) external view returns (uint256) {
-        return _gateway.estimateMessageCost(networkId, 96, GAS_LIMIT);
+    /// @inheritdoc ISenderCaller
+    function cost(uint16 networkId, bytes memory caldata) external view returns (uint256) {
+        TransferCmd memory Default;
+        Default.caldata = caldata;
+        bytes memory message = abi.encode(Default);
+
+        return _gateway.estimateMessageCost(networkId, message.length, GAS_LIMIT);
     }
 
-    /// @inheritdoc ISender
-    function send(uint16 networkId, address recipient, uint256 amount) external payable returns (bytes32 msgId) {
+    /// @inheritdoc ISenderCaller
+    function sendAndCall(uint16 networkId, address recipient, uint256 amount, address callee, bytes memory caldata)
+        external
+        payable
+        returns (bytes32 msgId)
+    {
         address targetToken = networks[networkId];
-        require(targetToken != address(0), "Unknown token on target network");
+        require(targetToken != address(0), Utils.UnknownToken(targetToken));
 
         _burn(msg.sender, amount);
 
-        bytes memory message = abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount}));
+        bytes memory message =
+            abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount, callee: callee, caldata: caldata}));
+
         return _gateway.submitMessage{value: msg.value}(targetToken, networkId, GAS_LIMIT, message);
     }
 
@@ -61,12 +73,27 @@ contract Token is IOmnichain, Ownable, ERC20Burnable, ERC20Capped {
         payable
         returns (bytes32)
     {
-        require(msg.sender == address(_gateway), "Unauthorized: only the gateway can call this method");
-        require(networks[uint16(networkId)] == address(uint160(uint256(source))), "Transfer from unknown network");
+        require(msg.sender == address(_gateway), Utils.UnauthorizedGW(msg.sender));
+        require(
+            networks[uint16(networkId)] == address(uint160(uint256(source))), Utils.UnknownNetwork(uint16(networkId))
+        );
 
         TransferCmd memory cmd = abi.decode(data, (TransferCmd));
 
         _mint(cmd.to, cmd.amount);
+
+        // Make callback if needed
+        if (cmd.callee != address(0)) {
+            if (cmd.callee.code.length == 0) {
+                emit Utils.InvalidCallee(cmd.callee);
+            } else {
+                try ICallee(cmd.callee).onTransferReceived(cmd.from, cmd.to, cmd.amount, cmd.caldata) {
+                    emit Utils.CallSucceed();
+                } catch {
+                    emit Utils.CallFailed();
+                }
+            }
+        }
 
         return id;
     }
