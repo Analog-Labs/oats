@@ -84,9 +84,15 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
 
         // Make callback if needed
         if (cmd.callee != address(0)) {
-            require(cmd.callee.code.length != 0, Utils.InvalidCallee(cmd.callee));
-
-            ICallee(cmd.callee).onTransferReceived(cmd.from, cmd.to, cmd.amount, cmd.caldata);
+            if (cmd.callee.code.length == 0) {
+                emit Utils.InvalidCallee(cmd.callee);
+            } else {
+                try ICallee(cmd.callee).onTransferReceived(cmd.from, cmd.to, cmd.amount, cmd.caldata) {
+                    emit Utils.CallSucceed();
+                } catch {
+                    emit Utils.CallFailed();
+                }
+            }
         }
 
         return id;

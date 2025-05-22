@@ -47,9 +47,14 @@ library Utils {
      * @param token Address of the token
      */
     error UnknownToken(address token);
+
     /**
      * @dev Callback callee address is wrong.
      * @param callee Address of the contract to be called.
      */
-    error InvalidCallee(address callee);
+    event InvalidCallee(address callee);
+
+    event CallSucceed();
+
+    event CallFailed();
 }
