@@ -17,8 +17,6 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
     /// @notice Supported networks with token contract addresses
     mapping(uint16 => address) public networks;
 
-    uint256 private constant GAS_LIMIT = 100_000;
-
     struct TransferCmd {
         address from;
         address to;
@@ -42,20 +40,23 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
     }
 
     /// @inheritdoc ISenderCaller
-    function cost(uint16 networkId, bytes memory caldata) external view returns (uint256) {
+    function cost(uint16 networkId, uint256 gasLimit, bytes memory caldata) external view returns (uint256) {
         TransferCmd memory Default;
         Default.caldata = caldata;
         bytes memory message = abi.encode(Default);
 
-        return _gateway.estimateMessageCost(networkId, message.length, GAS_LIMIT);
+        return _gateway.estimateMessageCost(networkId, message.length, gasLimit);
     }
 
     /// @inheritdoc ISenderCaller
-    function sendAndCall(uint16 networkId, address recipient, uint256 amount, address callee, bytes memory caldata)
-        external
-        payable
-        returns (bytes32 msgId)
-    {
+    function sendAndCall(
+        uint16 networkId,
+        address recipient,
+        uint256 amount,
+        uint256 gasLimit,
+        address callee,
+        bytes memory caldata
+    ) external payable returns (bytes32 msgId) {
         address targetToken = networks[networkId];
         require(targetToken != address(0), Utils.UnknownToken(targetToken));
 
@@ -64,7 +65,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
         bytes memory message =
             abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount, callee: callee, caldata: caldata}));
 
-        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, GAS_LIMIT, message);
+        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, gasLimit, message);
     }
 
     /// @inheritdoc IGmpReceiver
