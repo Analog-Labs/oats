@@ -18,12 +18,16 @@ interface ISender {
 
 /// @notice Interface for making GMP-based token transfer + contract call across chains.
 interface ISenderCaller {
-    function cost(uint16 networkId, bytes memory caldata) external view returns (uint256);
+    function cost(uint16 networkId, uint256 gasLimit, bytes memory caldata) external view returns (uint256);
 
-    function sendAndCall(uint16 networkId, address recipient, uint256 amount, address callee, bytes memory caldata)
-        external
-        payable
-        returns (bytes32 msgId);
+    function sendAndCall(
+        uint16 networkId,
+        address recipient,
+        uint256 amount,
+        uint256 gasLimit,
+        address callee,
+        bytes memory caldata
+    ) external payable returns (bytes32 msgId);
 }
 
 /// @notice Callee to be called upon x-chain token transfer delivery
