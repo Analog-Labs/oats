@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {IGmpReceiver} from "gmp-1.0.0/src/IGmpReceiver.sol";
+import {IGmpReceiver} from "gmp-2.0.0/src/IGmpReceiver.sol";
 
 /// @notice Interface for GMP-based token transfers across chains.
 interface ISender {

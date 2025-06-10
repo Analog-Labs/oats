@@ -2,7 +2,7 @@ pragma solidity ^0.8.0;
 
 import {Token} from "../src/TokenSenderCaller.sol";
 import {Utils, ICallee} from "../src/IOATS.sol";
-import {IGateway} from "gmp-1.0.0/src/IGateway.sol";
+import {IGateway} from "gmp-2.0.0/src/IGateway.sol";
 import {ERC20Capped} from "@openzeppelin/token/ERC20/extensions/ERC20Capped.sol";
 import {IERC20Errors} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {Test} from "forge-std/Test.sol";

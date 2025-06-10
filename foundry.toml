@@ -4,7 +4,7 @@ out = "out"
 libs = ["lib", "dependencies"]
 
 [dependencies]
-gmp = "1.0.0"
+gmp = "2.0.0"
 
 [soldeer]
 remappings_generate = true
