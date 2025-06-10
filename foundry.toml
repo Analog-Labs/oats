@@ -7,10 +7,10 @@ libs = ["lib", "dependencies"]
 gmp = "2.0.0"
 
 [soldeer]
+recursive_deps = true
 remappings_generate = true
 remappings_regenerate = false
 remappings_version = true
 remappings_prefix = ""
 remappings_location = "txt"
-
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
