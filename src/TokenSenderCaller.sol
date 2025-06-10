@@ -53,7 +53,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
         uint16 networkId,
         address recipient,
         uint256 amount,
-        uint256 gasLimit,
+        uint64 gasLimit,
         address callee,
         bytes memory caldata
     ) external payable returns (bytes32 msgId) {
@@ -65,7 +65,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
         bytes memory message =
             abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount, callee: callee, caldata: caldata}));
 
-        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, uint64(gasLimit), message);
+        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, gasLimit, message);
     }
 
     /// @inheritdoc IGmpReceiver
