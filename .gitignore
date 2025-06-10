@@ -12,3 +12,5 @@ docs/
 
 # Dotenv files
 .env*
+
+dependencies

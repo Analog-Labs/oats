@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
 import {ISender, Utils} from "./IOATS.sol";
-import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
-import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
+import {IGateway} from "gmp-1.0.0/src/IGateway.sol";
+import {IGmpReceiver} from "gmp-1.0.0/src/IGmpReceiver.sol";
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
@@ -17,7 +17,7 @@ contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     /// @notice Supported networks with token contract addresses
     mapping(uint16 => address) public networks;
 
-    uint256 private constant GAS_LIMIT = 100_000;
+    uint64 private constant GAS_LIMIT = 100_000;
 
     struct TransferCmd {
         address from;

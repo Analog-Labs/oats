@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
+import {IGmpReceiver} from "gmp-1.0.0/src/IGmpReceiver.sol";
 
 /// @notice Interface for GMP-based token transfers across chains.
 interface ISender {
@@ -18,7 +18,7 @@ interface ISender {
 
 /// @notice Interface for making GMP-based token transfer + contract call across chains.
 interface ISenderCaller {
-    function cost(uint16 networkId, uint256 gasLimit, bytes memory caldata) external view returns (uint256);
+    function cost(uint16 networkId, uint64 gasLimit, bytes memory caldata) external view returns (uint256);
 
     function sendAndCall(
         uint16 networkId,

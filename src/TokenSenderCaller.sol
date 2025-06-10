@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
 import {ISenderCaller, ICallee, Utils} from "./IOATS.sol";
-import {IGateway} from "@analog-gmp/interfaces/IGateway.sol";
-import {IGmpReceiver} from "@analog-gmp/interfaces/IGmpReceiver.sol";
+import {IGateway} from "gmp-1.0.0/src/IGateway.sol";
+import {IGmpReceiver} from "gmp-1.0.0/src/IGmpReceiver.sol";
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
@@ -40,12 +40,12 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
     }
 
     /// @inheritdoc ISenderCaller
-    function cost(uint16 networkId, uint256 gasLimit, bytes memory caldata) external view returns (uint256) {
+    function cost(uint16 networkId, uint64 gasLimit, bytes memory caldata) external view returns (uint256) {
         TransferCmd memory Default;
         Default.caldata = caldata;
         bytes memory message = abi.encode(Default);
 
-        return _gateway.estimateMessageCost(networkId, message.length, gasLimit);
+        return _gateway.estimateMessageCost(networkId, uint16(message.length), gasLimit);
     }
 
     /// @inheritdoc ISenderCaller
@@ -65,7 +65,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
         bytes memory message =
             abi.encode(TransferCmd({from: msg.sender, to: recipient, amount: amount, callee: callee, caldata: caldata}));
 
-        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, gasLimit, message);
+        return _gateway.submitMessage{value: msg.value}(targetToken, networkId, uint64(gasLimit), message);
     }
 
     /// @inheritdoc IGmpReceiver
