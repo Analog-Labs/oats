@@ -24,7 +24,7 @@ interface ISenderCaller {
         uint16 networkId,
         address recipient,
         uint256 amount,
-        uint256 gasLimit,
+        uint64 gasLimit,
         address callee,
         bytes memory caldata
     ) external payable returns (bytes32 msgId);
