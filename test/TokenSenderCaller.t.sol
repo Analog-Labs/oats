@@ -69,6 +69,7 @@ contract TokenSenderCallerTest is Test {
         assertEq(token.balanceOf(USER), AMOUNT * 2);
         assertEq(token.totalSupply(), CAP / 2 + AMOUNT * 2);
         assertEq(callee.total(), 0);
+        assertEq(callee.totalFrom(NETWORK), 0);
 
         // CALL SUCCEED
         cmd.callee = address(callee);
@@ -79,6 +80,7 @@ contract TokenSenderCallerTest is Test {
         assertEq(token.balanceOf(USER), AMOUNT * 3);
         assertEq(token.totalSupply(), CAP / 2 + AMOUNT * 3);
         assertEq(callee.total(), AMOUNT);
+        assertEq(callee.totalFrom(NETWORK), AMOUNT);
 
         // CALL FAILED:
         // - should not revert, but emit callFailed event,
@@ -91,6 +93,7 @@ contract TokenSenderCallerTest is Test {
         assertEq(token.balanceOf(USER), AMOUNT * 4);
         assertEq(token.totalSupply(), CAP / 2 + AMOUNT * 4);
         assertEq(callee.total(), AMOUNT);
+        assertEq(callee.totalFrom(NETWORK), AMOUNT);
 
         // CAP EXCEEDED
         data = abi.encode(
@@ -102,17 +105,24 @@ contract TokenSenderCallerTest is Test {
 }
 
 contract Callee is ICallee {
-    uint256 public total;
     address immutable _token;
+
+    uint256 public total;
+    mapping(uint16 => uint256) public totalByNetwork;
+
 
     constructor(address token) {
         _token = token;
     }
 
-    function onTransferReceived(address from, address, uint256 amount, bytes calldata) external {
+    function onTransferReceived(uint16 _newtork, address from, address, uint256 amount, bytes calldata) external {
         require(msg.sender == _token, "Unauthorized");
         require(from != address(0), "Failed");
 
         total += amount;
+    }
+
+    function totalFrom(uint16 _newtork) public view returns (uint256) {
+        return totalByNetwork[_newtork];
     }
 }

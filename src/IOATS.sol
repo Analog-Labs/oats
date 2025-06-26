@@ -32,7 +32,7 @@ interface ISenderCaller {
 
 /// @notice Callee to be called upon x-chain token transfer delivery
 interface ICallee {
-    function onTransferReceived(address from, address to, uint256 amount, bytes calldata caldata) external;
+    function onTransferReceived(uint16 fromNewtorkId, address from, address to, uint256 amount, bytes calldata caldata) external;
 }
 
 library Utils {

@@ -56,7 +56,7 @@ contract Token is ISender, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capped {
     }
 
     /// @inheritdoc IGmpReceiver
-    function onGmpReceived(bytes32 id, uint128 networkId, bytes32 source, uint64, bytes calldata data)
+    function onGmpReceived(bytes32 id, uint16 networkId, bytes32 source, uint64, bytes calldata data)
         external
         payable
         returns (bytes32)
