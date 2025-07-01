@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
 import {ISenderCaller, ICallee, Utils} from "./IOATS.sol";
-import {IGateway} from "gmp-2.0.0/src/IGateway.sol";
-import {IGmpReceiver} from "gmp-2.0.0/src/IGmpReceiver.sol";
+import {IGateway} from "@gmp/IGateway.sol";
+import {IGmpReceiver} from "@gmp/IGmpReceiver.sol";
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
