@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
 import {ISenderCaller, ICallee, Utils} from "./IOATS.sol";
-import {IGateway} from "gmp-2.0.0/src/IGateway.sol";
-import {IGmpReceiver} from "gmp-2.0.0/src/IGmpReceiver.sol";
+import {IGateway} from "@gmp/IGateway.sol";
+import {IGmpReceiver} from "@gmp/IGmpReceiver.sol";
 
 import {Ownable} from "@openzeppelin/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
@@ -69,7 +69,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
     }
 
     /// @inheritdoc IGmpReceiver
-    function onGmpReceived(bytes32 id, uint128 networkId, bytes32 source, uint64, bytes calldata data)
+    function onGmpReceived(bytes32 id, uint16 networkId, bytes32 source, uint64, bytes calldata data)
         external
         payable
         returns (bytes32)
@@ -88,7 +88,7 @@ contract Token is ISenderCaller, IGmpReceiver, Ownable, ERC20Burnable, ERC20Capp
             if (cmd.callee.code.length == 0) {
                 emit Utils.InvalidCallee(cmd.callee);
             } else {
-                try ICallee(cmd.callee).onTransferReceived(cmd.from, cmd.to, cmd.amount, cmd.caldata) {
+                try ICallee(cmd.callee).onTransferReceived(networkId, cmd.from, cmd.to, cmd.amount, cmd.caldata) {
                     emit Utils.CallSucceed();
                 } catch {
                     emit Utils.CallFailed();
